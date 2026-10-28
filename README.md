@@ -4,6 +4,8 @@
 
 仓库：<https://github.com/atrestandbed-bot/luosen>
 
+![预览 · 一键雨夜](docs/preview.png)
+
 > **声明**：本项目为非官方粉丝作品，仅用于学习与技术交流，与罗森（LAWSON）公司无任何关联或合作；"LAWSON / 罗森"及相关商标的权利归其权利人所有。请勿将本项目用于商业用途。
 
 ## 功能特性
