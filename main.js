@@ -7,6 +7,7 @@ const icons = {
   camera: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/><circle cx="12" cy="13" r="3"/></svg>',
   scanEye: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="1"/><path d="M18.944 12.33a1 1 0 0 0 0-.66 7.5 7.5 0 0 0-13.888 0 1 1 0 0 0 0 .66 7.5 7.5 0 0 0 13.888 0"/></svg>',
   eyeOff: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49M14.084 14.158a3 3 0 0 1-4.242-4.242M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143M2 2l20 20"/></svg>',
+  eye: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>',
   moon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486A9 9 0 0 1 11.514 3a7 7 0 1 0 9.471 9.486z"/></svg>',
   sunset: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 10V2M4.93 10.93 3.52 9.52M2 16h20M5 20h14M17.07 10.93l1.41-1.41M12 6a4 4 0 0 1 4 4"/></svg>',
   sun: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>',
@@ -138,8 +139,15 @@ document.querySelector('#rainNight').addEventListener('click', () => pushState({
 document.querySelector('#soundToggle').addEventListener('click', toggleSound);
 document.querySelector('#perspectiveToggle').addEventListener('click', () => { const active = document.querySelector('#perspectiveToggle').classList.toggle('is-active'); engine?.setPerspective(active); document.querySelector('#perspectiveToggle').setAttribute('aria-label', active ? '切换正交镜头' : '切换透视镜头'); showToast(active ? '透视镜头' : '正交镜头'); });
 document.querySelector('#screenshot').addEventListener('click', async () => { if (!engine) return; try { await engine.screenshot(); showToast('截图已导出为 PNG'); } catch { showToast('截图生成失败，请重试'); } });
-document.querySelector('#uiToggle').addEventListener('click', () => { app.classList.add('ui-hidden'); });
-document.querySelector('#restoreUI').addEventListener('click', () => { app.classList.remove('ui-hidden'); });
+function syncUIToggle() {
+  const hidden = app.classList.contains('ui-hidden');
+  const button = document.querySelector('#uiToggle');
+  button.innerHTML = hidden ? icons.eye : icons.eyeOff;
+  button.setAttribute('aria-label', hidden ? '显示界面' : '隐藏所有按钮文字');
+  button.setAttribute('title', hidden ? '显示界面' : '隐藏界面');
+}
+document.querySelector('#uiToggle').addEventListener('click', () => { app.classList.toggle('ui-hidden'); syncUIToggle(); });
+document.querySelector('#restoreUI').addEventListener('click', () => { app.classList.remove('ui-hidden'); syncUIToggle(); });
 document.querySelector('#reloadScene').addEventListener('click', () => window.location.reload());
 
 syncUI();
@@ -147,8 +155,9 @@ loadBrandAssets().then((assets) => {
   engine = createEngine(canvasHost, {
     ready: () => { loader.remove(); },
     error: (message) => { loader.remove(); errorPanel.hidden = false; errorText.textContent = message; },
-    select: (action) => { if (action === 'door') { state.door = !state.door; syncUI(); showToast(state.door ? '玻璃门打开了' : '玻璃门合上了'); } },
+    select: (action) => { if (action === 'door') { pushState({ door: !state.door }); showToast(state.door ? '玻璃门打开了' : '玻璃门合上了'); } },
     hover: setHint,
   }, assets);
   engine.setState(state);
+  if (document.querySelector('#perspectiveToggle').classList.contains('is-active')) engine.setPerspective(true);
 }).catch((error) => { loader.remove(); errorPanel.hidden = false; errorText.textContent = error?.message || '品牌资源加载失败，请刷新重试。'; });
