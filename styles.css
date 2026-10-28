@@ -12,3 +12,5 @@ button svg, .condition svg, .scene-choice svg, .dock-button svg, .rain-night-but
 @media (max-width: 760px) { .ui-hidden .utility-bar { margin-left: auto; } }
 
 .dock-button { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; white-space: nowrap; }
+.rain-night-button { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; white-space: nowrap; }
+.rain-night-button span { text-align: center; }
